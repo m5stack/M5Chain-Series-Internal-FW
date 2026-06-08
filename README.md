@@ -30,6 +30,9 @@ This repository hosts the STM32 internal firmware for the M5Stack Chain series d
 ### Unit ChainBus (SKU:U212)
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/unit/Unit_ChainBus)
 
+### Chain Mono (SKU:U217)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Mono)
+
 ## 🚀 Getting Started
 
 For comprehensive setup instructions, firmware update procedures, and usage examples, please refer to the official [M5Stack Chain Documentation](https://docs.m5stack.com).
