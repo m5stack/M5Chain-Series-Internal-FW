@@ -36,6 +36,12 @@ This repository hosts the STM32 internal firmware for the M5Stack Chain series d
 ### Chain RGB (SKU:U218)
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_RGB)
 
+### Chain PIR (SKU:U225)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_PIR)
+
+### Chain Switch (SKU:U337)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Switch)
+
 ## 🚀 Getting Started
 
 For comprehensive setup instructions, firmware update procedures, and usage examples, please refer to the official [M5Stack Chain Documentation](https://docs.m5stack.com).
