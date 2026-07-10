@@ -61,7 +61,7 @@ static void activate_tim1_dma(void)
     // Set the memory address for the DMA buffer.
     LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)s_rgb_buf);
     // Set the peripheral address to the TIM1 capture/compare register.
-    LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)&(TIM1->CCR1));
+    LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)(&(TIM1->CCR1)));
     // Clear the global interrupt flag for channel 5.
     LL_DMA_ClearFlag_GI5(DMA1);
     // Clear the transfer complete interrupt flag for channel 5.
