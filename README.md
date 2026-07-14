@@ -40,10 +40,10 @@ This repository hosts the STM32 internal firmware for the M5Stack Chain series d
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U223)
 
 ### Chain PIR (SKU:U225)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_PIR)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U225)
 
-### Chain Switch (SKU:U337)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Switch)
+### Chain Switch (SKU:U227)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U227)
 
 ## 🚀 Getting Started
 
