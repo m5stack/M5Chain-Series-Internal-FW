@@ -11,7 +11,7 @@
 | Start Address | End Address | Region Name | Size | Function Description |
 | -------------- | ------------ | ------------ | ----- | -------------------- |
 | 0x20000000 | 0x20001FFF | Boot | 8192 bytes | Used during the boot stage for buffering and variable storage |
-| 0x200000C0 | 0x20001FxFF | App | 8000 bytes | Used during application runtime for task stacks, variables, and caching |
+| 0x200000C0 | 0x20001FFF | App | 8000 bytes | Used during application runtime for task stacks, variables, and caching |
 ---
 ## 3. Detailed Description
 - **Boot Region (8 KB)**  

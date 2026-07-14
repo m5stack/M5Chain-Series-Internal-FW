@@ -3,7 +3,7 @@
 ### SKU: U206
 
 ## Related Link
-- [U206 Document & Datasheet](https://docs.m5stack.com/en/chain/Chain_Key)
+- [U206 Document & Datasheet](https://docs.m5stack.com/en/products/sku/U206)
 
 ## License
-- [MIT](https://github.com/m5stack/M5Chain-Series-Internal-FW/blob/main/LICENSE)
+- [MIT](../LICENSE)

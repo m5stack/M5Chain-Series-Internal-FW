@@ -1,4 +1,4 @@
-# Chain Key STM32 Internal Firmware
+# Unit 8Servos2 Chain STM32 Internal Firmware
 
 ### SKU: U223
 
@@ -6,4 +6,4 @@
 - [U223 Document & Datasheet](https://docs.m5stack.com/en/products/sku/U223)
 
 ## License
-- [MIT](https://github.com/m5stack/M5Chain-Series-Internal-FW/blob/main/LICENSE)
+- [MIT](../LICENSE)

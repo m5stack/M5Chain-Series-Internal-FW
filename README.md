@@ -13,28 +13,28 @@ This repository hosts the STM32 internal firmware for the M5Stack Chain series d
 ## 🔧 Supported Devices
 
 ### Chain Joystick (SKU:U205)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Joystick)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U205)
 
 ### Chain Key (SKU:U206)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Key)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U206)
 
 ### Chain Encoder (SKU:U207)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Encoder)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U207)
 
 ### Chain Angle (SKU:U208)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Angle)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U208)
 
 ### Chain ToF (SKU:U209)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_ToF)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U209)
 
 ### Unit ChainBus (SKU:U212)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/unit/Unit_ChainBus)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U212)
 
 ### Chain Mono (SKU:U217)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Mono)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U217)
 
 ### Chain RGB (SKU:U218)
-- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_RGB)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U218)
 
 ### Unit 8Servos2 Chain (SKU:U223)
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U223)
