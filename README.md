@@ -39,8 +39,14 @@ This repository hosts the STM32 internal firmware for the M5Stack Chain series d
 ### Unit 8Servos2 Chain (SKU:U223)
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U223)
 
+### Chain Buzzer (SKU:U224)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_Buzzer)
+
 ### Chain PIR (SKU:U225)
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U225)
+
+### Chain MIC (SKU:U226)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/chain/Chain_MIC)
 
 ### Chain Switch (SKU:U227)
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U227)
