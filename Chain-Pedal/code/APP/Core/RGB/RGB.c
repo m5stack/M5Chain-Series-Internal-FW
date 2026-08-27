@@ -40,7 +40,7 @@ static void activate_tim1_dma(void)
 {
     LL_DMA_SetDataLength(DMA1, LL_DMA_CHANNEL_5, (RGB_NUM + 10) * 24);
     LL_DMA_SetMemoryAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)s_rgb_buf);
-    LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t) (&(TIM1->CCR1)));
+    LL_DMA_SetPeriphAddress(DMA1, LL_DMA_CHANNEL_5, (uint32_t)(&(TIM1->CCR1)));
     LL_DMA_ClearFlag_GI5(DMA1);
     LL_DMA_ClearFlag_TC5(DMA1);
     LL_DMA_EnableIT_TC(DMA1, LL_DMA_CHANNEL_5);
