@@ -60,6 +60,9 @@ This repository hosts the STM32 internal firmware for the M5Stack Chain series d
 ### Chain DLight (SKU:U236)
 - 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U236)
 
+### Chain Pedal (SKU:U239)
+- 📖 [Documentation & Datasheet](https://docs.m5stack.com/en/products/sku/U239)
+
 ## 🚀 Getting Started
 
 For comprehensive setup instructions, firmware update procedures, and usage examples, please refer to the official [M5Stack Chain Documentation](https://docs.m5stack.com).
