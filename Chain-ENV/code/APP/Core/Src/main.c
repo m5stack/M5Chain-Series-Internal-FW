@@ -56,39 +56,39 @@
 
 /* USER CODE BEGIN PV */
 // DMA receive buffers
-__IO uint8_t g_uart_in_rx_buf[UART_BUFFER_SIZE][BUFFER_SIZE * 2];   // uart_in receive buffer for DMA
-__IO uint8_t g_uart_out_rx_buf[UART_BUFFER_SIZE][BUFFER_SIZE * 2];  // uart_out receive buffer for DMA
+__IO uint8_t g_uart_in_rx_buf[UART_BUFFER_SIZE][BUFFER_SIZE * 2];  // uart_in receive buffer for DMA
+__IO uint8_t g_uart_out_rx_buf[UART_BUFFER_SIZE][BUFFER_SIZE * 2]; // uart_out receive buffer for DMA
 
 // Transmission status for UART
-__IO uint8_t g_uart_in_rx_index  = 0;  // Index for UART input (receiving) buffer position
-__IO uint8_t g_uart_out_rx_index = 0;  // Index for UART output (receiving) buffer position
+__IO uint8_t g_uart_in_rx_index = 0;  // Index for UART input (receiving) buffer position
+__IO uint8_t g_uart_out_rx_index = 0; // Index for UART output (receiving) buffer position
 
 // Transmission complete flags for UART
-__IO uint8_t g_uart_in_transmit_complete  = 1;  // Flag indicating if uart_in transmission is complete (1: complete)
-__IO uint8_t g_uart_out_transmit_complete = 1;  // Flag indicating if uart_out transmission is complete (1: complete)
+__IO uint8_t g_uart_in_transmit_complete = 1;  // Flag indicating if uart_in transmission is complete (1: complete)
+__IO uint8_t g_uart_out_transmit_complete = 1; // Flag indicating if uart_out transmission is complete (1: complete)
 
 // Command buffer and related variables
-__IO uint8_t g_cmd_buf[BUFFER_SIZE] = {0};                    // Command buffer initialized to zero
-__IO uint8_t g_cmd_size             = 0;                      // Size of the command currently in the buffer
-__IO uint8_t g_cmd_status           = CMD_SPACE_IDLE_STATUS;  // Status of the command processing
+__IO uint8_t g_cmd_buf[BUFFER_SIZE] = {0};         // Command buffer initialized to zero
+__IO uint8_t g_cmd_size = 0;                       // Size of the command currently in the buffer
+__IO uint8_t g_cmd_status = CMD_SPACE_IDLE_STATUS; // Status of the command processing
 
 // Device status variables
-__IO uint8_t g_tail_status        = CHAIN_TAIL_DEVICE;  // Status of the tail device in the chain
-__IO uint8_t g_heart_beat_record  = 0;                  // Heartbeat record for monitoring device status
-__IO uint8_t g_bootloader_version = 0;                  // Version of the bootloader
-__IO uint8_t g_firmware_version   = SOFTWARE_VERSION;   // Version of the firmware
+__IO uint8_t g_tail_status = CHAIN_TAIL_DEVICE;     // Status of the tail device in the chain
+__IO uint8_t g_heart_beat_record = 0;               // Heartbeat record for monitoring device status
+__IO uint8_t g_bootloader_version = 0;              // Version of the bootloader
+__IO uint8_t g_firmware_version = SOFTWARE_VERSION; // Version of the firmware
 
 // Device type information
 __IO uint16_t g_device_type =
-    (uint8_t)((PRODUCT_TYPE_HIGH << 8) | PRODUCT_TYPE_LOW);  // Combined product type from high and low bytes
-__IO uint8_t g_light = 0;                                    // Light status or value
+    (uint8_t)((PRODUCT_TYPE_HIGH << 8) | PRODUCT_TYPE_LOW); // Combined product type from high and low bytes
+__IO uint8_t g_light = 0;                                   // Light status or value
 
-__IO static uint32_t s_last_press_time  = 0;  // Store the last press time in milliseconds
+__IO static uint32_t s_last_press_time = 0; // Store the last press time in milliseconds
 static uint32_t s_last_data_update_time = 0;
 
 __IO static uint8_t s_key_flag = 0;
 
-__IO uint8_t g_uid[12] = {0};  // Unique identifier
+__IO uint8_t g_uid[12] = {0}; // Unique identifier
 
 __IO uint8_t res;
 __IO uint8_t i;
@@ -112,11 +112,12 @@ void SystemClock_Config(void);
  */
 void iap_set(void)
 {
-    uint8_t i;                                     // Loop index
-    uint32_t *pVecTab = (uint32_t *)(0x20000000);  // Pointer to the vector table in SRAM
+    uint8_t i;                                    // Loop index
+    uint32_t *pVecTab = (uint32_t *)(0x20000000); // Pointer to the vector table in SRAM
 
     // Copy the interrupt vector table from the application address to SRAM
-    for (i = 0; i < 48; i++) {
+    for (i = 0; i < 48; i++)
+    {
         // Copy each vector entry to the SRAM vector table
         *(pVecTab++) = *(__IO uint32_t *)(APPLICATION_ADDRESS + (i << 2));
     }
@@ -139,11 +140,14 @@ void chain_init(void)
     g_bootloader_version = get_bootloader_version();
 
     // Check if the RGB light setting is set to maximum (0xFF)
-    if (get_rgb_light() == 0xFF) {
+    if (get_rgb_light() == 0xFF)
+    {
         // Set the light to a base color if it is maximum
         g_light = RGB_LIGHT_BASE;
         set_rgb_light(g_light);
-    } else {
+    }
+    else
+    {
         // Otherwise, get the current RGB light setting
         g_light = get_rgb_light();
     }
@@ -168,6 +172,7 @@ void read_uid(void)
  */
 int main(void)
 {
+
     /* USER CODE BEGIN 1 */
     iap_set();
     chain_init();
@@ -203,135 +208,151 @@ int main(void)
     MX_I2C2_Init();
     /* USER CODE BEGIN 2 */
     rgb_init();
-    if (aht20_basic_init() != 0) {
-        while (1) {
+    if (aht20_basic_init() != 0)
+    {
+        while (1)
+        {
             HAL_Delay(1000);
         }
     }
-    if (spa06_sensor_init() != 0) {
-        while (1) {
+    if (spa06_sensor_init() != 0)
+    {
+        while (1)
+        {
             HAL_Delay(1000);
         }
     }
+    chain_env_restore_spa06_sea_level_pressure();
 
     HAL_Delay(1);
-    LL_TIM_ClearFlag_UPDATE(TIM14);  // Clear update TIM14
-    LL_TIM_EnableIT_UPDATE(TIM14);   // ENABLE TIM14
-    LL_TIM_EnableCounter(TIM14);     // ENABLE TIM14
+    LL_TIM_ClearFlag_UPDATE(TIM14); // Clear update TIM14
+    LL_TIM_EnableIT_UPDATE(TIM14);  // ENABLE TIM14
+    LL_TIM_EnableCounter(TIM14);    // ENABLE TIM14
     HAL_Delay(1);
-    LL_TIM_ClearFlag_UPDATE(TIM17);  // Clear update TIM17
-    LL_TIM_EnableIT_UPDATE(TIM17);   // ENABLE TIM17
-    LL_TIM_EnableCounter(TIM17);     // ENABLE TIM17
+    LL_TIM_ClearFlag_UPDATE(TIM17); // Clear update TIM17
+    LL_TIM_EnableIT_UPDATE(TIM17);  // ENABLE TIM17
+    LL_TIM_EnableCounter(TIM17);    // ENABLE TIM17
     HAL_Delay(1);
-    LL_TIM_ClearFlag_UPDATE(TIM16);  // Clear update TIM16
-    LL_TIM_EnableIT_UPDATE(TIM16);   // ENABLE TIM16
-    LL_TIM_EnableCounter(TIM16);     // ENABLE TIM16
+    LL_TIM_ClearFlag_UPDATE(TIM16); // Clear update TIM16
+    LL_TIM_EnableIT_UPDATE(TIM16);  // ENABLE TIM16
+    LL_TIM_EnableCounter(TIM16);    // ENABLE TIM16
     HAL_Delay(1);
 
     /* USER CODE END 2 */
-    while (1) {
-        if (g_cmd_status == CMD_SPACE_BUSY_STATUS) {
-            switch (g_cmd_buf[0]) {
-                case CHAIN_SET_RGB_VALUE:
-                    chain_set_rgb_value((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_GET_RGB_VALUE:
-                    chain_get_rgb_value((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_SET_RGB_LIGHT:
-                    chain_set_light_value(g_cmd_buf[1], g_cmd_buf[2]);
-                    break;
-                case CHAIN_GET_RGB_LIGHT:
-                    chain_get_light_value();
-                    break;
-                case CHAIN_ENV_I2C_MEM_READ:
-                    if (g_cmd_size == 6U) {
-                        uint16_t reg_addr = (uint16_t)(((uint16_t)g_cmd_buf[4] << 8) | (uint16_t)g_cmd_buf[3]);
-                        chain_env_i2c_mem_read(g_cmd_buf[1], reg_addr, g_cmd_buf[2], g_cmd_buf[5]);
-                    } else {
-                        chain_env_i2c_mem_read(0x80U, 0U, 0U, 0U);
-                    }
-                    break;
-                case CHAIN_ENV_I2C_MEM_WRITE:
-                    if (g_cmd_size >= 6U && g_cmd_size == (uint8_t)(6U + g_cmd_buf[5])) {
-                        uint16_t reg_addr = (uint16_t)(((uint16_t)g_cmd_buf[4] << 8) | (uint16_t)g_cmd_buf[3]);
-                        chain_env_i2c_mem_write(g_cmd_buf[1], reg_addr, g_cmd_buf[2], g_cmd_buf[5],
-                                                (uint8_t *)(g_cmd_buf + 6));
-                    } else {
-                        chain_env_i2c_mem_write(0x80U, 0U, 0U, 0U, NULL);
-                    }
-                    break;
-                case CHAIN_ENV_GET_AHT20_DATA:
-                    chain_env_get_aht20_data_handle();
-                    break;
-                case CHAIN_ENV_GET_SPA06_DATA:
-                    chain_env_get_spa06_data_handle();
-                    break;
-                case CHAIN_ENV_SET_SPA06_TEMPERATURE_RATE:
-                    chain_env_set_spa06_temperature_rate_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_SPA06_TEMPERATURE_RATE:
-                    chain_env_get_spa06_temperature_rate_handle();
-                    break;
-                case CHAIN_ENV_SET_SPA06_PRESSURE_RATE:
-                    chain_env_set_spa06_pressure_rate_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_SPA06_PRESSURE_RATE:
-                    chain_env_get_spa06_pressure_rate_handle();
-                    break;
-                case CHAIN_ENV_SET_SPA06_SEA_LEVEL_PRESSURE:
-                    chain_env_set_spa06_sea_level_pressure_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_SPA06_SEA_LEVEL_PRESSURE:
-                    chain_env_get_spa06_sea_level_pressure_handle();
-                    break;
-                case CHAIN_ENV_SET_ALARM_MODE:
-                    chain_env_set_alarm_mode_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_ALARM_MODE:
-                    chain_env_get_alarm_mode_handle();
-                    break;
-                case CHAIN_ENV_SET_ALARM_TEMP_THRESHOLD:
-                    chain_env_set_alarm_temperature_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_ALARM_TEMP_THRESHOLD:
-                    chain_env_get_alarm_temperature_threshold_handle();
-                    break;
-                case CHAIN_ENV_SET_ALARM_HUMIDITY_THRESHOLD:
-                    chain_env_set_alarm_humidity_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_ALARM_HUMIDITY_THRESHOLD:
-                    chain_env_get_alarm_humidity_threshold_handle();
-                    break;
-                case CHAIN_ENV_SET_ALARM_PRESSURE_THRESHOLD:
-                    chain_env_set_alarm_pressure_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_ALARM_PRESSURE_THRESHOLD:
-                    chain_env_get_alarm_pressure_threshold_handle();
-                    break;
-                case CHAIN_ENV_SET_ALARM_ALTITUDE_THRESHOLD:
-                    chain_env_set_alarm_altitude_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
-                    break;
-                case CHAIN_ENV_GET_ALARM_ALTITUDE_THRESHOLD:
-                    chain_env_get_alarm_altitude_threshold_handle();
-                    break;
-                case CHAIN_GET_UID:
-                    chain_get_uid_handle(g_cmd_buf[1]);
-                    break;
-                case CHAIN_GET_BOOTLOADER_VERSION:
-                    chain_get_bootloader_version_handle();
-                    break;
-                case CHAIN_GET_VERSION_DEVICE:
-                    chain_get_firmware_version_handle();
-                    break;
-                case CHAIN_GET_DEVICE_TYPE:
-                    chain_get_device_type_handle();
-                    break;
-                case CHAIN_IAP_UPDATE:
-                    chain_iap_update_handle(g_cmd_buf[1]);
-                    break;
-                default:
-                    break;
+    while (1)
+    {
+        if (g_cmd_status == CMD_SPACE_BUSY_STATUS)
+        {
+            switch (g_cmd_buf[0])
+            {
+            case CHAIN_SET_RGB_VALUE:
+                chain_set_rgb_value((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_GET_RGB_VALUE:
+                chain_get_rgb_value((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_SET_RGB_LIGHT:
+                chain_set_light_value(g_cmd_buf[1], g_cmd_buf[2]);
+                break;
+            case CHAIN_GET_RGB_LIGHT:
+                chain_get_light_value();
+                break;
+            case CHAIN_ENV_I2C_MEM_READ:
+                if (g_cmd_size == 6U)
+                {
+                    uint16_t reg_addr = (uint16_t)(((uint16_t)g_cmd_buf[4] << 8) | (uint16_t)g_cmd_buf[3]);
+                    chain_env_i2c_mem_read(g_cmd_buf[1], reg_addr, g_cmd_buf[2], g_cmd_buf[5]);
+                }
+                else
+                {
+                    chain_env_i2c_mem_read(0x80U, 0U, 0U, 0U);
+                }
+                break;
+            case CHAIN_ENV_I2C_MEM_WRITE:
+                if (g_cmd_size >= 6U && g_cmd_size == (uint8_t)(6U + g_cmd_buf[5]))
+                {
+                    uint16_t reg_addr = (uint16_t)(((uint16_t)g_cmd_buf[4] << 8) | (uint16_t)g_cmd_buf[3]);
+                    chain_env_i2c_mem_write(g_cmd_buf[1], reg_addr, g_cmd_buf[2], g_cmd_buf[5], (uint8_t *)(g_cmd_buf + 6));
+                }
+                else
+                {
+                    chain_env_i2c_mem_write(0x80U, 0U, 0U, 0U, NULL);
+                }
+                break;
+            case CHAIN_ENV_GET_AHT20_DATA:
+                chain_env_get_aht20_data_handle();
+                break;
+            case CHAIN_ENV_GET_SPA06_DATA:
+                chain_env_get_spa06_data_handle();
+                break;
+            case CHAIN_ENV_SET_SPA06_TEMPERATURE_RATE:
+                chain_env_set_spa06_temperature_rate_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_SPA06_TEMPERATURE_RATE:
+                chain_env_get_spa06_temperature_rate_handle();
+                break;
+            case CHAIN_ENV_SET_SPA06_PRESSURE_RATE:
+                chain_env_set_spa06_pressure_rate_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_SPA06_PRESSURE_RATE:
+                chain_env_get_spa06_pressure_rate_handle();
+                break;
+            case CHAIN_ENV_SET_SPA06_SEA_LEVEL_PRESSURE:
+                chain_env_set_spa06_sea_level_pressure_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_SPA06_SEA_LEVEL_PRESSURE:
+                chain_env_get_spa06_sea_level_pressure_handle();
+                break;
+            case CHAIN_ENV_CALIBRATE_SPA06_SEA_LEVEL_PRESSURE:
+                chain_env_calibrate_spa06_sea_level_pressure_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_SET_ALARM_MODE:
+                chain_env_set_alarm_mode_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_ALARM_MODE:
+                chain_env_get_alarm_mode_handle();
+                break;
+            case CHAIN_ENV_SET_ALARM_TEMP_THRESHOLD:
+                chain_env_set_alarm_temperature_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_ALARM_TEMP_THRESHOLD:
+                chain_env_get_alarm_temperature_threshold_handle();
+                break;
+            case CHAIN_ENV_SET_ALARM_HUMIDITY_THRESHOLD:
+                chain_env_set_alarm_humidity_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_ALARM_HUMIDITY_THRESHOLD:
+                chain_env_get_alarm_humidity_threshold_handle();
+                break;
+            case CHAIN_ENV_SET_ALARM_PRESSURE_THRESHOLD:
+                chain_env_set_alarm_pressure_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_ALARM_PRESSURE_THRESHOLD:
+                chain_env_get_alarm_pressure_threshold_handle();
+                break;
+            case CHAIN_ENV_SET_ALARM_ALTITUDE_THRESHOLD:
+                chain_env_set_alarm_altitude_threshold_handle((uint8_t *)(g_cmd_buf + 1), (g_cmd_size - 1));
+                break;
+            case CHAIN_ENV_GET_ALARM_ALTITUDE_THRESHOLD:
+                chain_env_get_alarm_altitude_threshold_handle();
+                break;
+            case CHAIN_GET_UID:
+                chain_get_uid_handle(g_cmd_buf[1]);
+                break;
+            case CHAIN_GET_BOOTLOADER_VERSION:
+                chain_get_bootloader_version_handle();
+                break;
+            case CHAIN_GET_VERSION_DEVICE:
+                chain_get_firmware_version_handle();
+                break;
+            case CHAIN_GET_DEVICE_TYPE:
+                chain_get_device_type_handle();
+                break;
+            case CHAIN_IAP_UPDATE:
+                chain_iap_update_handle(g_cmd_buf[1]);
+                break;
+            default:
+                break;
             }
             g_cmd_status = CMD_SPACE_IDLE_STATUS;
         }
@@ -339,7 +360,8 @@ int main(void)
 
         /* USER CODE BEGIN 3 */
         uint32_t current_time = HAL_GetTick();
-        if ((uint32_t)(current_time - s_last_data_update_time) >= 2000U) {
+        if ((uint32_t)(current_time - s_last_data_update_time) >= 2000U)
+        {
             s_last_data_update_time = current_time;
             env_data_update();
             spa06_data_update();
@@ -367,30 +389,32 @@ void SystemClock_Config(void)
     /** Initializes the RCC Oscillators according to the specified parameters
      * in the RCC_OscInitTypeDef structure.
      */
-    RCC_OscInitStruct.OscillatorType      = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;
-    RCC_OscInitStruct.HSIState            = RCC_HSI_ON;
-    RCC_OscInitStruct.HSIDiv              = RCC_HSI_DIV1;
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.HSIDiv = RCC_HSI_DIV1;
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-    RCC_OscInitStruct.LSIState            = RCC_LSI_ON;
-    RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_HSI;
-    RCC_OscInitStruct.PLL.PLLM            = RCC_PLLM_DIV1;
-    RCC_OscInitStruct.PLL.PLLN            = 8;
-    RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2;
-    RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV4;
-    RCC_OscInitStruct.PLL.PLLR            = RCC_PLLR_DIV2;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK) {
+    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+    RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV1;
+    RCC_OscInitStruct.PLL.PLLN = 8;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV4;
+    RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
         Error_Handler();
     }
 
     /** Initializes the CPU, AHB and APB buses clocks
      */
-    RCC_ClkInitStruct.ClockType      = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
-    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider  = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
     RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+    {
         Error_Handler();
     }
 }
@@ -408,7 +432,8 @@ void Error_Handler(void)
     /* USER CODE BEGIN Error_Handler_Debug */
     /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
-    while (1) {
+    while (1)
+    {
     }
     /* USER CODE END Error_Handler_Debug */
 }

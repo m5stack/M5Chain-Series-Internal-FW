@@ -1,14 +1,18 @@
 #include "env_function.h"
 #include "RGB.h"
+#include <math.h>
 
-#define CHAIN_ENV_RATE_PAYLOAD_SIZE            (1U)
-#define CHAIN_ENV_SEA_LEVEL_PRESS_PAYLOAD_SIZE (2U)
-#define CHAIN_ENV_MODE_PAYLOAD_SIZE            (1U)
-#define CHAIN_ENV_TEMP_THRESHOLD_PAYLOAD_SIZE  (3U)
-#define CHAIN_ENV_HUMI_THRESHOLD_PAYLOAD_SIZE  (2U)
-#define CHAIN_ENV_PRESS_THRESHOLD_PAYLOAD_SIZE (4U)
-#define CHAIN_ENV_ALTI_THRESHOLD_PAYLOAD_SIZE  (8U)
-#define CHAIN_ENV_I2C_MAX_LENGTH               (32U)
+#define CHAIN_ENV_RATE_PAYLOAD_SIZE                      (1U)
+#define CHAIN_ENV_SEA_LEVEL_PRESS_PAYLOAD_SIZE           (3U)
+#define CHAIN_ENV_CALIBRATE_SEA_LEVEL_PRESS_PAYLOAD_SIZE (5U)
+#define CHAIN_ENV_CALIBRATE_SAMPLE_COUNT                 (16U)
+#define CHAIN_ENV_CALIBRATE_SAMPLE_INTERVAL_MS           (250U)
+#define CHAIN_ENV_MODE_PAYLOAD_SIZE                      (1U)
+#define CHAIN_ENV_TEMP_THRESHOLD_PAYLOAD_SIZE            (3U)
+#define CHAIN_ENV_HUMI_THRESHOLD_PAYLOAD_SIZE            (2U)
+#define CHAIN_ENV_PRESS_THRESHOLD_PAYLOAD_SIZE           (4U)
+#define CHAIN_ENV_ALTI_THRESHOLD_PAYLOAD_SIZE            (8U)
+#define CHAIN_ENV_I2C_MAX_LENGTH                         (32U)
 
 #define CHAIN_ENV_ALARM_MODE_TEMP_MASK            (0x01U)
 #define CHAIN_ENV_ALARM_MODE_HUMI_MASK            (0x02U)
@@ -173,6 +177,52 @@ static uint8_t chain_env_i2c_write_touches_spa06_config(uint8_t i2c_addr, uint16
             chain_env_i2c_write_touches_reg(reg_addr, write_len, SPA06_REG_CFG_REG, &offset))
                ? 1U
                : 0U;
+}
+
+static uint8_t chain_env_calculate_sea_level_pressure(int32_t reference_altitude_cm, uint16_t *pressure_hpa_x10)
+{
+    uint64_t pressure_sum_pa = 0U;
+    double measured_pressure_pa;
+    double reference_altitude_m;
+    double sea_level_pressure_pa;
+    double sea_level_pressure_hpa_x10;
+
+    if (pressure_hpa_x10 == NULL) {
+        return 0U;
+    }
+
+    for (uint8_t sample = 0U; sample < CHAIN_ENV_CALIBRATE_SAMPLE_COUNT; sample++) {
+        uint32_t pressure_pa = 0U;
+
+        if (spa06_sensor_read_pressure(&pressure_pa) != 0U) {
+            return 0U;
+        }
+
+        pressure_sum_pa += pressure_pa;
+        LL_IWDG_ReloadCounter(IWDG);
+
+        if (sample + 1U < CHAIN_ENV_CALIBRATE_SAMPLE_COUNT) {
+            HAL_Delay(CHAIN_ENV_CALIBRATE_SAMPLE_INTERVAL_MS);
+        }
+    }
+
+    measured_pressure_pa = (double)pressure_sum_pa / (double)CHAIN_ENV_CALIBRATE_SAMPLE_COUNT;
+    reference_altitude_m = (double)reference_altitude_cm / 100.0;
+
+    if (reference_altitude_m >= 44330.0) {
+        return 0U;
+    }
+
+    sea_level_pressure_pa      = measured_pressure_pa / pow(1.0 - (reference_altitude_m / 44330.0), 5.255);
+    sea_level_pressure_hpa_x10 = sea_level_pressure_pa / 10.0;
+
+    if ((sea_level_pressure_hpa_x10 < (double)CHAIN_ENV_SEA_LEVEL_PRESS_MIN_HPA_X10) ||
+        (sea_level_pressure_hpa_x10 > (double)CHAIN_ENV_SEA_LEVEL_PRESS_MAX_HPA_X10)) {
+        return 0U;
+    }
+
+    *pressure_hpa_x10 = (uint16_t)(sea_level_pressure_hpa_x10 + 0.5);
+    return 1U;
 }
 
 static uint8_t chain_env_update_sensor_params_from_i2c_write(uint8_t i2c_addr, uint16_t reg_addr, uint8_t write_len)
@@ -419,20 +469,37 @@ void chain_env_set_spa06_sea_level_pressure_handle(uint8_t *buffer, uint8_t size
 {
     uint8_t status            = OPERATION_FAIL;
     uint16_t pressure_hpa_x10 = 0U;
+    uint8_t save_to_flash     = 0U;
 
     if ((buffer != NULL) && (size == CHAIN_ENV_SEA_LEVEL_PRESS_PAYLOAD_SIZE)) {
         pressure_hpa_x10 = chain_env_get_u16_le(buffer);
+        save_to_flash    = buffer[2];
         if ((pressure_hpa_x10 >= CHAIN_ENV_SEA_LEVEL_PRESS_MIN_HPA_X10) &&
-            (pressure_hpa_x10 <= CHAIN_ENV_SEA_LEVEL_PRESS_MAX_HPA_X10)) {
-            s_spa06_sea_level_press_hpa_x10 = pressure_hpa_x10;
-            s_spa06_sea_level_pressure_pa   = chain_env_pressure_hpa_x10_to_pa(pressure_hpa_x10);
-            spa06_sensor_set_sea_level_pressure(s_spa06_sea_level_pressure_pa);
-            s_alti_zone = 0U;
-            status      = OPERATION_SUCCESS;
+            (pressure_hpa_x10 <= CHAIN_ENV_SEA_LEVEL_PRESS_MAX_HPA_X10) && (save_to_flash <= 1U)) {
+            if ((save_to_flash == 0U) || (pressure_hpa_x10 == get_spa06_sea_level_pressure()) ||
+                set_spa06_sea_level_pressure(pressure_hpa_x10)) {
+                s_spa06_sea_level_press_hpa_x10 = pressure_hpa_x10;
+                s_spa06_sea_level_pressure_pa   = chain_env_pressure_hpa_x10_to_pa(pressure_hpa_x10);
+                spa06_sensor_set_sea_level_pressure(s_spa06_sea_level_pressure_pa);
+                s_alti_zone = 0U;
+                status      = OPERATION_SUCCESS;
+            }
         }
     }
 
     chain_env_reply_status(CHAIN_ENV_SET_SPA06_SEA_LEVEL_PRESSURE, status);
+}
+
+void chain_env_restore_spa06_sea_level_pressure(void)
+{
+    uint16_t pressure_hpa_x10 = get_spa06_sea_level_pressure();
+
+    if ((pressure_hpa_x10 >= CHAIN_ENV_SEA_LEVEL_PRESS_MIN_HPA_X10) &&
+        (pressure_hpa_x10 <= CHAIN_ENV_SEA_LEVEL_PRESS_MAX_HPA_X10)) {
+        s_spa06_sea_level_press_hpa_x10 = pressure_hpa_x10;
+        s_spa06_sea_level_pressure_pa   = chain_env_pressure_hpa_x10_to_pa(pressure_hpa_x10);
+        spa06_sensor_set_sea_level_pressure(s_spa06_sea_level_pressure_pa);
+    }
 }
 
 void chain_env_get_spa06_sea_level_pressure_handle(void)
@@ -441,6 +508,32 @@ void chain_env_get_spa06_sea_level_pressure_handle(void)
 
     chain_env_put_u16_le(data, s_spa06_sea_level_press_hpa_x10);
     chain_command_complete_return(CHAIN_ENV_GET_SPA06_SEA_LEVEL_PRESSURE, data, sizeof(data));
+}
+
+void chain_env_calibrate_spa06_sea_level_pressure_handle(uint8_t *buffer, uint8_t size)
+{
+    uint8_t status                = OPERATION_FAIL;
+    uint8_t save_to_flash         = 0U;
+    int32_t reference_altitude_cm = 0;
+    uint16_t pressure_hpa_x10     = 0U;
+
+    if ((buffer != NULL) && (size == CHAIN_ENV_CALIBRATE_SEA_LEVEL_PRESS_PAYLOAD_SIZE)) {
+        reference_altitude_cm = chain_env_get_i32_le(buffer);
+        save_to_flash         = buffer[4];
+
+        if ((save_to_flash <= 1U) &&
+            chain_env_calculate_sea_level_pressure(reference_altitude_cm, &pressure_hpa_x10) != 0U &&
+            ((save_to_flash == 0U) || (pressure_hpa_x10 == get_spa06_sea_level_pressure()) ||
+             set_spa06_sea_level_pressure(pressure_hpa_x10))) {
+            s_spa06_sea_level_press_hpa_x10 = pressure_hpa_x10;
+            s_spa06_sea_level_pressure_pa   = chain_env_pressure_hpa_x10_to_pa(pressure_hpa_x10);
+            spa06_sensor_set_sea_level_pressure(s_spa06_sea_level_pressure_pa);
+            s_alti_zone = 0U;
+            status      = OPERATION_SUCCESS;
+        }
+    }
+
+    chain_env_reply_status(CHAIN_ENV_CALIBRATE_SPA06_SEA_LEVEL_PRESSURE, status);
 }
 
 void chain_env_set_alarm_mode_handle(uint8_t *buffer, uint8_t size)
