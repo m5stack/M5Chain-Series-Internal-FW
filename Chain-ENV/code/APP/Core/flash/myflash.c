@@ -117,9 +117,46 @@ bool set_rgb_light(uint8_t data)
 }
 
 /**
+ * @brief Save the SPA06 sea-level pressure setting in the shared flash page.
+ * @param data Sea-level pressure in
+ * hPa multiplied by 10.
+ * @retval true if the value was written and verified successfully, false otherwise.
+ */
+bool set_spa06_sea_level_pressure(uint16_t data)
+{
+    uint64_t temp = my_flash_read_double_word(STM32G0xx_FLASH_PAGE31_STARTADDR);
+
+    set_byte_in_uint64(&temp, 2U, (uint8_t)(data & 0xFFU));
+    set_byte_in_uint64(&temp, 3U, (uint8_t)(data >> 8));
+
+    __disable_irq();
+    if (!my_flash_earse_pages(STM32G0xx_FLASH_PAGE31_STARTADDR) ||
+        !my_flash_write_double_word(STM32G0xx_FLASH_PAGE31_STARTADDR, temp)) {
+        __enable_irq();
+        return false;
+    }
+    __enable_irq();
+
+    return (get_spa06_sea_level_pressure() == data);
+}
+
+/**
+ * @brief Read the SPA06 sea-level pressure setting from the shared flash page.
+ * @retval Sea-level pressure in hPa
+ * multiplied by 10.
+ */
+uint16_t get_spa06_sea_level_pressure(void)
+{
+    uint16_t low  = *((__IO uint8_t *)(SPA06_SEA_LEVEL_PRESSURE_ADDR));
+    uint16_t high = *((__IO uint8_t *)(SPA06_SEA_LEVEL_PRESSURE_ADDR + 1U));
+
+    return (uint16_t)(low | (uint16_t)(high << 8));
+}
+
+/**
  * @brief Get the current RGB brightness value.
- * @note This function reads the current brightness value stored at the
- *       defined RGB light address.
+ * @note This function reads the current brightness value stored at
+ * the defined RGB light address.
  *
  * @param None
  * @retval The current RGB brightness value.

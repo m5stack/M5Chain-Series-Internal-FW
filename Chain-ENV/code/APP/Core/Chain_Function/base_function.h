@@ -18,7 +18,7 @@ extern "C" {
 
 #define CHECK_PASS        (1)     // Check passed
 #define CHECK_ERROR       (0)     // Check not passed
-#define SOFTWARE_VERSION  (0x01)  // Software version
+#define SOFTWARE_VERSION  (0x02)  // Software version
 #define PRODUCT_TYPE_HIGH (0x00)  // Define product type
 #define PRODUCT_TYPE_LOW  (0x0F)  // Define product type
 #define PACK_HEAD_HIGH    (0xAA)  // Packet header
